@@ -1,0 +1,5 @@
+# NAME: Proxy Patch
+# TOTAL: 2
+
+DOMAIN-SUFFIX,challenges.cloudflare.com
+DOMAIN-SUFFIX,ourbits.club
