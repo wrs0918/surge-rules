@@ -1,8 +1,0 @@
-# NAME: Proxy Patch
-# TOTAL: 5
-
-DOMAIN-SUFFIX,githubusercontent.com
-DOMAIN-SUFFIX,challenges.cloudflare.com
-DOMAIN-SUFFIX,ourbits.club
-DOMAIN-SUFFIX,chdbits.xyz
-DOMAIN-SUFFIX,hdfans.org
