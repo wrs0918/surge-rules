@@ -200,6 +200,9 @@ def build_all() -> None:
         "DOMAIN-SUFFIX,pttime.org",
         "DOMAIN-SUFFIX,hdsky.me",
         "DOMAIN-SUFFIX,audiences.me",
+        "DOMAIN-SUFFIX,rainbowisland.co",
+        "DOMAIN-KEYWORD,tracker",
+        "DOMAIN-KEYWORD,announce",
     ]
     write_list(RULES_DIR / "PT-Direct.list", "PT Direct", pt_extra + pt_up)
 

@@ -1,9 +1,12 @@
 # NAME: PT Direct
-# TOTAL: 246
+# TOTAL: 248
 
 DOMAIN-SUFFIX,pttime.org
 DOMAIN-SUFFIX,hdsky.me
 DOMAIN-SUFFIX,audiences.me
+DOMAIN-SUFFIX,rainbowisland.co
+DOMAIN-KEYWORD,tracker
+DOMAIN-KEYWORD,announce
 DOMAIN,004430.xyz
 DOMAIN,021912.xyz
 DOMAIN,1337.abcvg.info
@@ -240,7 +243,6 @@ DOMAIN-SUFFIX,trontv.com
 DOMAIN-SUFFIX,u2.dmhy.org
 DOMAIN-SUFFIX,uhdbits.org
 DOMAIN-SUFFIX,xauat6.edu.cn
-DOMAIN-KEYWORD,announce
 DOMAIN-KEYWORD,chdbits
 DOMAIN-KEYWORD,m-team
 DOMAIN-KEYWORD,torrent
