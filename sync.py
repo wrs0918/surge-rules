@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-Build and sanitize ALL Surge rule-sets into wrs0918/surge-rules.
-Eliminates the need for separate patch lists by sanitizing ChinaMax, Proxy, Ads, and AI lists at build time.
+Build, sanitize, and Trie-compress ALL Surge rule-sets into wrs0918/surge-rules.
+Optimizations:
+1. Strips IP-CIDR6 (IPv6 disabled), URL-REGEX, and USER-AGENT slow rules globally.
+2. Uses curated China core domains (~3k) instead of bloated 123k ChinaMax (GEOIP,CN handles long-tail CN IPs in O(1)).
+3. Performs suffix-tree (Trie) deduplication: removes redundant DOMAIN / DOMAIN-SUFFIX entries already covered by a parent DOMAIN-SUFFIX in the same list.
 """
 
 import urllib.request
@@ -44,7 +47,7 @@ UPSTREAM = {
     "microsoft": f"{BM7}/Microsoft/Microsoft.list",
     "google": f"{BM7}/Google/Google.list",
     "pt": f"{BM7}/PrivateTracker/PrivateTracker.list",
-    "chinamax": f"{BM7}/ChinaMax/ChinaMax_All.list",
+    "china": f"{BM7}/China/China_All_No_Resolve.list",
     "proxy": [
         f"{BM7}/GitHub/GitHub.list",
         f"{BM7}/Proxy/Proxy_All_No_Resolve.list",
@@ -88,7 +91,6 @@ ADS_WHITELIST_DOMAINS = {
 }
 
 # 3. Overseas Cloudflare-protected sites that are blackholed over domestic direct connection
-#    Must be excluded from Direct/ChinaMax/PT-Direct and placed into Proxy.list
 FORCE_PROXY_DOMAINS = {
     "ourbits.club",
     "chdbits.xyz",
@@ -97,15 +99,25 @@ FORCE_PROXY_DOMAINS = {
     "githubusercontent.com",
 }
 
+# 4. Slow / unused rule types stripped globally
+SKIP_RULE_TYPES = {
+    "IP-CIDR6",
+    "URL-REGEX",
+    "USER-AGENT",
+}
+
 
 def fetch_lines(url: str) -> list[str]:
-    req = urllib.request.Request(url, headers={"User-Agent": "surge-rules-sync/2.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "surge-rules-sync/3.0"})
     with urllib.request.urlopen(req, timeout=45) as resp:
         text = resp.read().decode("utf-8", errors="ignore")
     out = []
     for raw in text.splitlines():
         line = raw.strip()
         if not line or line.startswith("#") or line.startswith("//"):
+            continue
+        rtype = line.split(",", 1)[0].strip().upper()
+        if rtype in SKIP_RULE_TYPES:
             continue
         out.append(line)
     return out
@@ -129,19 +141,48 @@ def is_ai_polluted(rule_line: str) -> bool:
     return False
 
 
-def dedup_preserve(lines: list[str]) -> list[str]:
+def compress_and_dedup(lines: list[str], strip_ip_cidr: bool = False) -> list[str]:
+    """
+    Deduplicates rules and removes any DOMAIN / DOMAIN-SUFFIX rule whose domain
+    is already covered by a broader parent DOMAIN-SUFFIX in the same list.
+    """
+    suffixes = set()
+    for line in lines:
+        rtype, val = extract_target(line)
+        if rtype == "DOMAIN-SUFFIX" and val:
+            suffixes.add(val)
+
+    def has_parent_suffix(domain: str, is_suffix_rule: bool) -> bool:
+        parts = domain.split(".")
+        start = 1 if is_suffix_rule else 0
+        for i in range(start, len(parts)):
+            parent = ".".join(parts[i:])
+            if parent in suffixes and (not is_suffix_rule or parent != domain):
+                return True
+        return False
+
     seen = set()
     res = []
     for line in lines:
-        if line not in seen:
-            seen.add(line)
-            res.append(line)
+        rtype, val = extract_target(line)
+        if not rtype:
+            continue
+        if strip_ip_cidr and rtype in ("IP-CIDR", "IP-ASN"):
+            continue
+        if rtype == "DOMAIN" and has_parent_suffix(val, False):
+            continue
+        if rtype == "DOMAIN-SUFFIX" and has_parent_suffix(val, True):
+            continue
+        norm = f"{rtype},{val}" if rtype in ("DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD") else line
+        if norm not in seen:
+            seen.add(norm)
+            res.append(norm if rtype in ("DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD") else line)
     return res
 
 
-def write_list(path: Path, title: str, rules: list[str]) -> None:
+def write_list(path: Path, title: str, rules: list[str], strip_ip_cidr: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    clean = dedup_preserve(rules)
+    clean = compress_and_dedup(rules, strip_ip_cidr=strip_ip_cidr)
     header = [
         f"# NAME: {title}",
         f"# TOTAL: {len(clean)}",
@@ -160,7 +201,6 @@ def build_all() -> None:
             continue
         ads_up.append(r)
     ads_extra = [
-        # Block browser built-in DoH so Chrome falls back to Surge Fake-IP DNS immediately
         "DOMAIN,chrome.cloudflare-dns.com",
     ]
     write_list(RULES_DIR / "Ads.list", "Ads & DoH Block (Cleaned)", ads_extra + ads_up)
@@ -288,12 +328,11 @@ def build_all() -> None:
         proxy_rules.extend(fetch_lines(u))
     write_list(RULES_DIR / "Proxy.list", "Global Proxy (Cleaned)", proxy_rules)
 
-    # 7. ChinaMax / Direct (PT-Direct + ChinaMax minus FORCE_PROXY_DOMAINS)
+    # 7. ChinaMax / Direct (Curated China core domains + PT-Direct, stripping redundant IP-CIDRs covered by GEOIP,CN)
     direct_rules = [
         "DOMAIN,wxa.wxs.qq.com",
         "DOMAIN,wximg.wxs.qq.com",
         "DOMAIN,safebrowsing.urlsec.qq.com",
-        "IP-CIDR,162.159.128.0/18,no-resolve",
         "DOMAIN-SUFFIX,pttime.org",
         "DOMAIN-SUFFIX,hdsky.me",
         "DOMAIN-SUFFIX,audiences.me",
@@ -301,12 +340,15 @@ def build_all() -> None:
         "DOMAIN-KEYWORD,tracker",
         "DOMAIN-KEYWORD,announce",
     ]
-    for r in fetch_lines(UPSTREAM["pt"]) + fetch_lines(UPSTREAM["chinamax"]):
+    for r in fetch_lines(UPSTREAM["pt"]) + fetch_lines(UPSTREAM["china"]):
         _, val = extract_target(r)
         if val in FORCE_PROXY_DOMAINS:
             continue
         direct_rules.append(r)
-    write_list(RULES_DIR / "ChinaMax.list", "ChinaMax & PT Direct (Cleaned)", direct_rules)
+    # Strip generic CN IP-CIDRs (GEOIP,CN handles them in O(1)), then append the specific CF HKG Anycast CIDR
+    clean_direct = compress_and_dedup(direct_rules, strip_ip_cidr=True)
+    clean_direct.insert(0, "IP-CIDR,162.159.128.0/18,no-resolve")
+    write_list(RULES_DIR / "ChinaMax.list", "China Core & PT Direct (Cleaned)", clean_direct)
 
 
 if __name__ == "__main__":

@@ -1,8 +1,7 @@
 # NAME: Global Proxy (Cleaned)
-# TOTAL: 7025
+# TOTAL: 7008
 
 DOMAIN-SUFFIX,githubusercontent.com
-DOMAIN-SUFFIX,challenges.cloudflare.com
 DOMAIN-SUFFIX,ourbits.club
 DOMAIN-SUFFIX,chdbits.xyz
 DOMAIN-SUFFIX,hdfans.org
@@ -10,9 +9,7 @@ DOMAIN-SUFFIX,atom.io
 DOMAIN-SUFFIX,dependabot.com
 DOMAIN-SUFFIX,ghcr.io
 DOMAIN-SUFFIX,git.io
-DOMAIN-SUFFIX,github-atom-io-herokuapp-com.freetls.fastly.net
 DOMAIN-SUFFIX,github-avatars.oss-cn-hongkong.aliyuncs.com
-DOMAIN-SUFFIX,github-cloud.s3.amazonaws.com
 DOMAIN-SUFFIX,github.blog
 DOMAIN-SUFFIX,github.com
 DOMAIN-SUFFIX,github.community
@@ -3161,7 +3158,6 @@ DOMAIN-SUFFIX,jjgirls.com
 DOMAIN-SUFFIX,jkb.cc
 DOMAIN-SUFFIX,jkforum.net
 DOMAIN-SUFFIX,jkub.com
-DOMAIN-SUFFIX,jma.go.jp
 DOMAIN-SUFFIX,jmscult.com
 DOMAIN-SUFFIX,joachims.org
 DOMAIN-SUFFIX,jobso.tv
@@ -4127,7 +4123,6 @@ DOMAIN-SUFFIX,nownews.com
 DOMAIN-SUFFIX,nowtorrents.com
 DOMAIN-SUFFIX,noxinfluencer.com
 DOMAIN-SUFFIX,noypf.com
-DOMAIN-SUFFIX,npa.go.jp
 DOMAIN-SUFFIX,npnt.me
 DOMAIN-SUFFIX,nps.gov
 DOMAIN-SUFFIX,npsboost.com
@@ -7014,15 +7009,3 @@ IP-CIDR,74.86.0.0/16,no-resolve
 IP-CIDR,75.126.0.0/16,no-resolve
 IP-CIDR,91.105.192.0/23,no-resolve
 IP-CIDR,91.108.0.0/16,no-resolve
-IP-CIDR6,2001:67c:4e8::/48,no-resolve
-IP-CIDR6,2001:b28:f23d::/48,no-resolve
-IP-CIDR6,2001:b28:f23f::/48,no-resolve
-IP-CIDR6,2a0a:f280::/32,no-resolve
-USER-AGENT,Duolingo*
-USER-AGENT,OneDrive*
-USER-AGENT,PayPal*
-USER-AGENT,Roam*
-USER-AGENT,WhatsApp*
-USER-AGENT,battleroyale*
-USER-AGENT,com.apple.trustd*
-USER-AGENT,hearthstone*
