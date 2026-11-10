@@ -1,5 +1,5 @@
 # NAME: Gemini (Cleaned)
-# TOTAL: 22
+# TOTAL: 25
 
 DOMAIN,ai.google.dev
 DOMAIN,aistudio.google.com
@@ -10,6 +10,9 @@ DOMAIN,alkalimakersuite-pa.clients6.google.com
 DOMAIN,geller-pa.googleapis.com
 DOMAIN,proactivebackend-pa.googleapis.com
 DOMAIN,robinfrontend-pa.googleapis.com
+DOMAIN,cloudcode-pa.googleapis.com
+DOMAIN,daily-cloudcode-pa.googleapis.com
+DOMAIN-SUFFIX,cloudcode-pa.googleapis.com
 DOMAIN-SUFFIX,gemini.google.com
 DOMAIN-SUFFIX,gemini.google
 DOMAIN-SUFFIX,notebooklm.google.com

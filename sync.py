@@ -41,9 +41,6 @@ POLLUTED_SHARED_DOMAINS = {
     "static.cloudflareinsights.com",
     "stripe.com",
     "turn.livekit.cloud",
-    # Antigravity cloudcode must stay in Google group, never AI group
-    "cloudcode-pa.googleapis.com",
-    "daily-cloudcode-pa.googleapis.com",
 }
 
 # IP/ASN rules in upstream OpenAI/Copilot lists that belong to general cloud providers (DigitalOcean/Vultr)
@@ -139,6 +136,9 @@ def build_all() -> None:
         "DOMAIN,geller-pa.googleapis.com",
         "DOMAIN,proactivebackend-pa.googleapis.com",
         "DOMAIN,robinfrontend-pa.googleapis.com",
+        "DOMAIN,cloudcode-pa.googleapis.com",
+        "DOMAIN,daily-cloudcode-pa.googleapis.com",
+        "DOMAIN-SUFFIX,cloudcode-pa.googleapis.com",
         "DOMAIN-SUFFIX,gemini.google.com",
         "DOMAIN-SUFFIX,gemini.google",
         "DOMAIN-SUFFIX,notebooklm.google.com",
