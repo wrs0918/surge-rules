@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
 Build and sanitize Surge rule-sets from upstream sources + curated rules.
-Removes polluted shared SaaS/CDN domains (e.g. challenges.cloudflare.com, stripe.com, auth0.com)
-from AI rule-sets and fixes PT/ChinaMax misclassifications.
+Each policy group in Surge maps cleanly to a single .list file.
 """
 
 import urllib.request
@@ -12,11 +11,29 @@ ROOT = Path(__file__).resolve().parent
 RULES_DIR = ROOT / "rules"
 AI_DIR = RULES_DIR / "ai"
 
+BM7 = "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge"
+
 UPSTREAM = {
-    "openai": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/OpenAI/OpenAI.list",
-    "claude": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Claude/Claude.list",
-    "gemini": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Gemini/Gemini.list",
-    "pt": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/PrivateTracker/PrivateTracker.list",
+    "openai": f"{BM7}/OpenAI/OpenAI.list",
+    "claude": f"{BM7}/Claude/Claude.list",
+    "gemini": f"{BM7}/Gemini/Gemini.list",
+    "pt": f"{BM7}/PrivateTracker/PrivateTracker.list",
+    "social": [
+        f"{BM7}/Facebook/Facebook.list",
+        f"{BM7}/Instagram/Instagram.list",
+        f"{BM7}/Discord/Discord.list",
+        f"{BM7}/Reddit/Reddit.list",
+    ],
+    "game": [
+        f"{BM7}/Steam/Steam.list",
+        f"{BM7}/Epic/Epic.list",
+        f"{BM7}/Sony/Sony.list",
+        f"{BM7}/Nintendo/Nintendo.list",
+    ],
+    "china_media": [
+        f"{BM7}/BiliBili/BiliBili.list",
+        f"{BM7}/ChinaMedia/ChinaMedia.list",
+    ],
 }
 
 # Shared infrastructure / SaaS domains that must NOT be hijacked by AI rule-sets
@@ -43,7 +60,6 @@ POLLUTED_SHARED_DOMAINS = {
     "turn.livekit.cloud",
 }
 
-# IP/ASN rules in upstream OpenAI/Copilot lists that belong to general cloud providers (DigitalOcean/Vultr)
 POLLUTED_IP_ASN = {
     "IP-ASN,14061",
     "IP-ASN,20473",
@@ -52,7 +68,7 @@ POLLUTED_IP_ASN = {
 
 def fetch_lines(url: str) -> list[str]:
     req = urllib.request.Request(url, headers={"User-Agent": "surge-rules-sync/1.0"})
-    with urllib.request.urlopen(req, timeout=20) as resp:
+    with urllib.request.urlopen(req, timeout=25) as resp:
         text = resp.read().decode("utf-8", errors="ignore")
     out = []
     for raw in text.splitlines():
@@ -124,7 +140,7 @@ def build_all() -> None:
     ]
     write_list(AI_DIR / "Claude.list", "Claude (Cleaned)", claude_extra + claude_up)
 
-    # 3. Gemini (Google AI)
+    # 3. Gemini (Google AI & Antigravity Cloud Code)
     gemini_up = [r for r in fetch_lines(UPSTREAM["gemini"]) if not is_polluted(r)]
     gemini_extra = [
         "DOMAIN,ai.google.dev",
@@ -161,14 +177,12 @@ def build_all() -> None:
 
     # 5. AI-Common (Clean Copilot + Perplexity / Cursor / Poe / OpenRouter / Groq / xAI etc.)
     ai_common_rules = [
-        # Microsoft Copilot (pure domains only, without polluted OpenAI/Cloudflare entries)
         "DOMAIN,copilot.microsoft.com",
         "DOMAIN,sydney.bing.com",
         "DOMAIN-SUFFIX,edgeservices.bing.com",
         "DOMAIN,gateway.bingviz.microsoft.net",
         "DOMAIN,gateway.bingviz.microsoftapp.net",
         "DOMAIN-SUFFIX,bing-shopping.microsoft-falcon.io",
-        # Other overseas AI services
         "DOMAIN-SUFFIX,perplexity.ai",
         "DOMAIN-SUFFIX,pplx.ai",
         "DOMAIN-SUFFIX,poe.com",
@@ -188,7 +202,7 @@ def build_all() -> None:
     ]
     write_list(AI_DIR / "AI-Common.list", "AI Common (Copilot & Overseas AI)", ai_common_rules)
 
-    # 6. PT-Direct (All direct-friendly PT sites, excluding sites blocked over domestic direct connection)
+    # 6. Direct (Adblock whitelist + Direct-friendly PT sites + Tracker keywords + Public CF Anycast HKG range)
     pt_proxy_only = {"ourbits.club", "chdbits.xyz", "hdfans.org"}
     pt_up = []
     for r in fetch_lines(UPSTREAM["pt"]):
@@ -196,35 +210,59 @@ def build_all() -> None:
         if len(parts) >= 2 and parts[1].lower() in pt_proxy_only:
             continue
         pt_up.append(r)
-    pt_extra = [
+    direct_rules = [
+        # WeChat CDN & SafeBrowsing whitelist (prevent false adblock REJECT-DROP retry storms)
+        "DOMAIN,wxa.wxs.qq.com",
+        "DOMAIN,wximg.wxs.qq.com",
+        "DOMAIN,safebrowsing.urlsec.qq.com",
+        # Public Cloudflare HKG Anycast IP range
+        "IP-CIDR,162.159.128.0/18,no-resolve",
+        # Direct PT sites & general BT/PT tracker keywords
         "DOMAIN-SUFFIX,pttime.org",
         "DOMAIN-SUFFIX,hdsky.me",
         "DOMAIN-SUFFIX,audiences.me",
         "DOMAIN-SUFFIX,rainbowisland.co",
         "DOMAIN-KEYWORD,tracker",
         "DOMAIN-KEYWORD,announce",
-    ]
-    write_list(RULES_DIR / "PT-Direct.list", "PT Direct", pt_extra + pt_up)
+    ] + pt_up
+    write_list(RULES_DIR / "Direct.list", "Direct & PT", direct_rules)
 
-    # 7. Proxy-Patch (High-priority proxy overrides before ChinaMax / AI rules)
+    # 7. Proxy-Patch (High-priority proxy overrides before Direct / ChinaMax / AI rules)
     proxy_patch_rules = [
+        # GitHub Raw CDN (prevent rule-set bootstrap deadlock)
+        "DOMAIN-SUFFIX,githubusercontent.com",
         # Keep Cloudflare Turnstile challenge widget on the main proxy to match site exit IP
         "DOMAIN-SUFFIX,challenges.cloudflare.com",
-        # PT / overseas CF-protected sites whose default CF IP is blackholed over direct connection
+        # PT sites whose default CF IP is blackholed over domestic direct connection
         "DOMAIN-SUFFIX,ourbits.club",
         "DOMAIN-SUFFIX,chdbits.xyz",
         "DOMAIN-SUFFIX,hdfans.org",
     ]
     write_list(RULES_DIR / "Proxy-Patch.list", "Proxy Patch", proxy_patch_rules)
 
-    # 8. Direct-Patch (High-priority direct overrides before Adblock to prevent SDK retry storms)
-    direct_patch_rules = [
-        # WeChat Mini-Program & image CDN falsely blocked by ad rules causing REJECT-DROP retry storms
-        "DOMAIN,wxa.wxs.qq.com",
-        "DOMAIN,wximg.wxs.qq.com",
-        "DOMAIN,safebrowsing.urlsec.qq.com",
+    # 8. Reject (Browser DoH block to enforce Surge Fake-IP DNS)
+    reject_rules = [
+        "DOMAIN,chrome.cloudflare-dns.com",
     ]
-    write_list(RULES_DIR / "Direct-Patch.list", "Direct Patch", direct_patch_rules)
+    write_list(RULES_DIR / "Reject.list", "Reject Patch", reject_rules)
+
+    # 9. Social (Facebook + Instagram + Discord + Reddit combined)
+    social_rules = []
+    for u in UPSTREAM["social"]:
+        social_rules.extend(fetch_lines(u))
+    write_list(RULES_DIR / "Social.list", "Social Media Combined", social_rules)
+
+    # 10. Game (Steam + Epic + Sony + Nintendo combined)
+    game_rules = []
+    for u in UPSTREAM["game"]:
+        game_rules.extend(fetch_lines(u))
+    write_list(RULES_DIR / "Game.list", "Game Platforms Combined", game_rules)
+
+    # 11. ChinaMedia (BiliBili + ChinaMedia combined)
+    cn_media_rules = []
+    for u in UPSTREAM["china_media"]:
+        cn_media_rules.extend(fetch_lines(u))
+    write_list(RULES_DIR / "ChinaMedia.list", "China Media Combined", cn_media_rules)
 
 
 if __name__ == "__main__":

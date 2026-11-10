@@ -1,6 +1,10 @@
-# NAME: PT Direct
-# TOTAL: 248
+# NAME: Direct & PT
+# TOTAL: 252
 
+DOMAIN,wxa.wxs.qq.com
+DOMAIN,wximg.wxs.qq.com
+DOMAIN,safebrowsing.urlsec.qq.com
+IP-CIDR,162.159.128.0/18,no-resolve
 DOMAIN-SUFFIX,pttime.org
 DOMAIN-SUFFIX,hdsky.me
 DOMAIN-SUFFIX,audiences.me
