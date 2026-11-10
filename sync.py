@@ -189,7 +189,7 @@ def build_all() -> None:
     write_list(AI_DIR / "AI-Common.list", "AI Common (Copilot & Overseas AI)", ai_common_rules)
 
     # 6. PT-Direct (All direct-friendly PT sites, excluding sites blocked over domestic direct connection)
-    pt_proxy_only = {"ourbits.club"}
+    pt_proxy_only = {"ourbits.club", "chdbits.xyz", "hdfans.org"}
     pt_up = []
     for r in fetch_lines(UPSTREAM["pt"]):
         parts = [p.strip() for p in r.split(",")]
@@ -197,10 +197,8 @@ def build_all() -> None:
             continue
         pt_up.append(r)
     pt_extra = [
-        "DOMAIN-SUFFIX,chdbits.xyz",
         "DOMAIN-SUFFIX,pttime.org",
         "DOMAIN-SUFFIX,hdsky.me",
-        "DOMAIN-SUFFIX,hdfans.org",
         "DOMAIN-SUFFIX,audiences.me",
     ]
     write_list(RULES_DIR / "PT-Direct.list", "PT Direct", pt_extra + pt_up)
@@ -211,6 +209,8 @@ def build_all() -> None:
         "DOMAIN-SUFFIX,challenges.cloudflare.com",
         # PT / overseas CF-protected sites whose default CF IP is blackholed over direct connection
         "DOMAIN-SUFFIX,ourbits.club",
+        "DOMAIN-SUFFIX,chdbits.xyz",
+        "DOMAIN-SUFFIX,hdfans.org",
     ]
     write_list(RULES_DIR / "Proxy-Patch.list", "Proxy Patch", proxy_patch_rules)
 
