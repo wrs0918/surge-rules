@@ -1,9 +1,8 @@
 # NAME: China Core & PT Direct (Cleaned)
-# TOTAL: 3909
+# TOTAL: 3906
 
 IP-CIDR,162.159.128.0/18,no-resolve
 DOMAIN-SUFFIX,pttime.org
-DOMAIN-SUFFIX,hdsky.me
 DOMAIN-SUFFIX,audiences.me
 DOMAIN-SUFFIX,rainbowisland.co
 DOMAIN-KEYWORD,tracker
@@ -216,7 +215,6 @@ DOMAIN-SUFFIX,orpheus.network
 DOMAIN-SUFFIX,passthepopcorn.me
 DOMAIN-SUFFIX,pornbits.net
 DOMAIN-SUFFIX,privatehd.to
-DOMAIN-SUFFIX,pterclub.com
 DOMAIN-SUFFIX,pthome.net
 DOMAIN-SUFFIX,ptsbao.club
 DOMAIN-SUFFIX,pussytorrents.org
@@ -232,7 +230,6 @@ DOMAIN-SUFFIX,tjupt.org
 DOMAIN-SUFFIX,torrentday.com
 DOMAIN-SUFFIX,torrentleech.org
 DOMAIN-SUFFIX,torrentseeds.org
-DOMAIN-SUFFIX,totheglory.im
 DOMAIN-SUFFIX,trontv.com
 DOMAIN-SUFFIX,u2.dmhy.org
 DOMAIN-SUFFIX,uhdbits.org

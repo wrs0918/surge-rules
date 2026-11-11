@@ -95,6 +95,10 @@ FORCE_PROXY_DOMAINS = {
     "ourbits.club",
     "chdbits.xyz",
     "hdfans.org",
+    "hdsky.me",
+    "totheglory.im",
+    "pterclub.com",
+    "pterclub.net",
     "challenges.cloudflare.com",
     "githubusercontent.com",
 }
@@ -323,6 +327,10 @@ def build_all() -> None:
         "DOMAIN-SUFFIX,ourbits.club",
         "DOMAIN-SUFFIX,chdbits.xyz",
         "DOMAIN-SUFFIX,hdfans.org",
+        "DOMAIN-SUFFIX,hdsky.me",
+        "DOMAIN-SUFFIX,totheglory.im",
+        "DOMAIN-SUFFIX,pterclub.com",
+        "DOMAIN-SUFFIX,pterclub.net",
     ]
     for u in UPSTREAM["proxy"]:
         proxy_rules.extend(fetch_lines(u))
@@ -334,7 +342,6 @@ def build_all() -> None:
         "DOMAIN,wximg.wxs.qq.com",
         "DOMAIN,safebrowsing.urlsec.qq.com",
         "DOMAIN-SUFFIX,pttime.org",
-        "DOMAIN-SUFFIX,hdsky.me",
         "DOMAIN-SUFFIX,audiences.me",
         "DOMAIN-SUFFIX,rainbowisland.co",
         "DOMAIN-KEYWORD,tracker",
