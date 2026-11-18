@@ -1,0 +1,45 @@
+# Rex 首页/播放模块分流（手动维护，sync.py 不会覆盖）
+# 覆盖：Jable、MissAV、Pornhub、xHamster、XVideos、Eporner、WowXXX 及其封面/视频 CDN
+# github.com / githubusercontent.com 已由 Proxy.list 覆盖，此处不重复
+# 原教程按站点分 TW/JP/US 三组；合并为单列表后统一走「节点选择」，需提速时在 Surge 里手动切换节点区域
+
+# Jable（TW 源站）
+DOMAIN-SUFFIX,jable.tv
+
+# MissAV 及备用域名/图床/视频 CDN
+DOMAIN-SUFFIX,missav.media
+DOMAIN-SUFFIX,missav.ws
+DOMAIN-SUFFIX,missav.fans
+DOMAIN-KEYWORD,surrit
+DOMAIN-SUFFIX,mrstcdn.store
+DOMAIN-SUFFIX,mushroomtrack.com
+
+# DMM / JAV 预告片与封面（JP 源站）
+DOMAIN-SUFFIX,dmm.co.jp
+DOMAIN-SUFFIX,javtrailers.com
+DOMAIN-SUFFIX,mgstage.com
+
+# Pornhub
+DOMAIN-SUFFIX,pornhub.com
+DOMAIN-SUFFIX,phncdn.com
+
+# xHamster
+DOMAIN-SUFFIX,xhamster.com
+DOMAIN-SUFFIX,xhcdn.com
+
+# XVideos
+DOMAIN-SUFFIX,xvideos.com
+DOMAIN-SUFFIX,xvideos-cdn.com
+
+# Eporner
+DOMAIN-SUFFIX,eporner.com
+DOMAIN-SUFFIX,sb-cd.com
+
+# WowXXX（模块内需填 cf_clearance，节点须与挖钥匙时一致）
+DOMAIN-SUFFIX,wowxxx.to
+DOMAIN-SUFFIX,fpvcdn.com
+
+# 通用：CF Worker 托管的模块文件 + wsrv 图片代理
+DOMAIN-SUFFIX,workers.dev
+DOMAIN-SUFFIX,wsrv.nl
+DOMAIN-SUFFIX,ahcdn.com

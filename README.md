@@ -24,4 +24,5 @@ Every policy group in Surge maps 1-to-1 to a single `.list` file in this reposit
 - `Microsoft.list` — Microsoft services
 - `Google.list` — Google services
 - `ChinaMax.list` — ChinaMax + direct-friendly PT sites + tracker keywords (with CF-blackholed PT sites removed at source)
+- `Rex.list` — Rex 首页/播放模块（Jable、MissAV、Pornhub、xHamster、XVideos、Eporner、WowXXX + 封面/视频 CDN + workers.dev/wsrv 图床，手动维护不受 weekly sync 影响）
 - `Proxy.list` — Global Proxy + GitHub + Cloudflare Turnstile (`challenges.cloudflare.com`) + CF-protected PT sites (`ourbits.club`, `chdbits.xyz`, `hdfans.org`)
